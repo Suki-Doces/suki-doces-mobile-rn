@@ -9,7 +9,7 @@ import { Screen } from '@/components/layout/Screen';
 
 export default function ContactScreen() {
   return (
-    <Screen contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+    <Screen keyboardShouldPersistTaps="handled">
       <ContactHeading />
       <ContactCards />
       <ContactForm />
@@ -18,11 +18,3 @@ export default function ContactScreen() {
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  content: {
-    paddingHorizontal: 16,
-    paddingTop: 24,
-    paddingBottom: 40,
-  },
-});

@@ -1,5 +1,6 @@
 import { usePathname, useRouter } from 'expo-router';
 import { Alert, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { GlassView } from 'expo-glass-effect';
 
 import { Icon } from '@/components/ui/Icon';
 import { comingSoonMessage, navItems } from '@/constants/navigation';
@@ -14,8 +15,9 @@ export function BottomNavigation() {
     else Alert.alert(item.label, comingSoonMessage);
   }
 
+  /* Aplicacao do GlassView no BottomNavigation */
   return (
-    <View style={styles.bar}>
+    <GlassView style={styles.bar}>
       {navItems.map((item) => {
         const active = item.href === pathname;
         return (
@@ -31,13 +33,17 @@ export function BottomNavigation() {
           </Pressable>
         );
       })}
-    </View>
+    </GlassView>
   );
 }
 
 const styles = StyleSheet.create({
   bar: {
-    minHeight: 78,
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    minHeight: 78, 
     marginHorizontal: 18,
     marginTop: 4,
     marginBottom: Platform.OS === 'ios' ? 12 : 10,
@@ -49,7 +55,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255,194,227,0.65)',
     borderRadius: 30,
-    backgroundColor: 'rgba(247,181,204,0.94)',
+    backgroundColor: 'rgba(247,181,204,0.7)',
+    overflow: 'hidden',
     shadowColor: '#000',
     shadowOpacity: 0.14,
     shadowRadius: 8,

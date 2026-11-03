@@ -3,18 +3,16 @@ import { StatusBar } from 'expo-status-bar';
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
 
 import { BottomNavigation } from '@/components/layout/BottomNavigation';
-import { BrandHeader } from '@/components/layout/BrandHeader';
 import { colors } from '@/constants/colors';
 
 export default function RootLayout() {
   return (
     <View style={styles.app}>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       <KeyboardAvoidingView
         style={styles.app}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <BrandHeader />
         <Tabs
           tabBar={() => <BottomNavigation />}
           screenOptions={{ headerShown: false, sceneStyle: { backgroundColor: colors.white } }}
