@@ -19,7 +19,6 @@ export function BrandHeader({ scrollY }: BrandHeaderProps) {
     extrapolate: 'clamp',
   });
 
-  // ANIMAÇÃO NOVA: Reduz a largura (de tela cheia com margens para 120px)
   const headerWidth = scrollY.interpolate({
     inputRange: [0, 100],
     outputRange: [SCREEN_WIDTH - 20, 85], 
@@ -50,23 +49,39 @@ export function BrandHeader({ scrollY }: BrandHeaderProps) {
     extrapolate: 'clamp',
   });
 
+  // NOVA ANIMAÇÃO: Desliza o header para cima e para fora da tela
+  const translateY = scrollY.interpolate({
+    inputRange: [50, 180], // Começa a subir após 50px de scroll
+    outputRange: [0, -150], // Move 150px para cima (o suficiente para escondê-lo)
+    extrapolate: 'clamp',
+  });
+
+  // NOVA ANIMAÇÃO: Reduz a opacidade (fade-out) para uma transição mais suave
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [80, 180], // Fica transparente entre 80px e 180px de scroll
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+
   return (
     <Animated.View style={[
       styles.header, 
       { 
         top: insets.top + 10,
         height: headerHeight,
-        width: headerWidth // <-- 2. Aplica a largura animada
+        width: headerWidth,
+        opacity: headerOpacity, // <-- Aplica o fade-out
+        transform: [{ translateY }] // <-- Aplica a movimentação para cima
       }
     ]}>
       <View accessible accessibilityLabel={store.name} style={styles.lockup}>
         <Animated.Text style={[styles.name, { fontSize: titleSize }]}>Suki</Animated.Text>
         
         <Animated.View style={{ 
-          height: taglineHeight, 
-          marginTop: taglineMargin, 
-          opacity: taglineOpacity, 
-          overflow: 'hidden' 
+          height: taglineHeight,
+          marginTop: taglineMargin,
+          opacity: taglineOpacity,
+          overflow: 'hidden'
         }}>
           <Text style={styles.tagline}>doces</Text>
         </Animated.View>
@@ -79,7 +94,6 @@ const styles = StyleSheet.create({
   header: {
     position: 'absolute',
     left: 10,
-    // right: 10, <-- 3. REMOVIDO! Isso impedia a largura de encolher
     paddingHorizontal: 20,
     borderRadius: 29,
     backgroundColor: colors.pink,
