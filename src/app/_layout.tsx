@@ -13,12 +13,13 @@ export default function RootLayout() {
         style={styles.app}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <Tabs
+       <Tabs
           tabBar={() => <BottomNavigation />}
           screenOptions={{ headerShown: false, sceneStyle: { backgroundColor: colors.white } }}
         >
           <Tabs.Screen name="index" />
           <Tabs.Screen name="contact" />
+          <Tabs.Screen name="history" />
         </Tabs>
       </KeyboardAvoidingView>
     </View>
