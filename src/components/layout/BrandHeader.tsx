@@ -1,9 +1,9 @@
 import { Animated, Dimensions, StyleSheet, View, Text } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors } from '@/constants/colors';
+import { colors, gradients } from '@/constants/colors';
 import { store } from '@/constants/store';
 
-// 1. Captura a largura total do dispositivo
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 interface BrandHeaderProps {
@@ -21,7 +21,7 @@ export function BrandHeader({ scrollY }: BrandHeaderProps) {
 
   const headerWidth = scrollY.interpolate({
     inputRange: [0, 100],
-    outputRange: [SCREEN_WIDTH - 20, 85], 
+    outputRange: [SCREEN_WIDTH - 20, 85],
     extrapolate: 'clamp',
   });
 
@@ -49,61 +49,75 @@ export function BrandHeader({ scrollY }: BrandHeaderProps) {
     extrapolate: 'clamp',
   });
 
-  // NOVA ANIMAÇÃO: Desliza o header para cima e para fora da tela
   const translateY = scrollY.interpolate({
-    inputRange: [50, 180], // Começa a subir após 50px de scroll
-    outputRange: [0, -150], // Move 150px para cima (o suficiente para escondê-lo)
+    inputRange: [50, 180],
+    outputRange: [0, -150],
     extrapolate: 'clamp',
   });
 
-  // NOVA ANIMAÇÃO: Reduz a opacidade (fade-out) para uma transição mais suave
   const headerOpacity = scrollY.interpolate({
-    inputRange: [80, 180], // Fica transparente entre 80px e 180px de scroll
+    inputRange: [80, 180],
     outputRange: [1, 0],
     extrapolate: 'clamp',
   });
 
   return (
-    <Animated.View style={[
-      styles.header, 
-      { 
-        top: insets.top + 10,
-        height: headerHeight,
-        width: headerWidth,
-        opacity: headerOpacity, // <-- Aplica o fade-out
-        transform: [{ translateY }] // <-- Aplica a movimentação para cima
-      }
-    ]}>
-      <View accessible accessibilityLabel={store.name} style={styles.lockup}>
-        <Animated.Text style={[styles.name, { fontSize: titleSize }]}>Suki</Animated.Text>
-        
-        <Animated.View style={{ 
-          height: taglineHeight,
-          marginTop: taglineMargin,
-          opacity: taglineOpacity,
-          overflow: 'hidden'
-        }}>
-          <Text style={styles.tagline}>doces</Text>
-        </Animated.View>
-      </View>
+    <Animated.View
+      style={[
+        styles.headerWrapper,
+        {
+          top: insets.top + 10,
+          height: headerHeight,
+          width: headerWidth,
+          opacity: headerOpacity,
+          transform: [{ translateY }],
+        },
+      ]}
+    >
+      <LinearGradient
+        colors={gradients.brandPink}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1.2 }}
+        style={styles.gradient}
+      >
+        <View accessible accessibilityLabel={store.name} style={styles.lockup}>
+          <Animated.Text style={[styles.name, { fontSize: titleSize }]}>
+            Suki
+          </Animated.Text>
+
+          <Animated.View
+            style={{
+              height: taglineHeight,
+              marginTop: taglineMargin,
+              opacity: taglineOpacity,
+              overflow: 'hidden',
+            }}
+          >
+            <Text style={styles.tagline}>doces</Text>
+          </Animated.View>
+        </View>
+      </LinearGradient>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
-  header: {
+  headerWrapper: {
     position: 'absolute',
     left: 10,
+    borderRadius: 29,
+    shadowColor: colors.pink,
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 6,
+    zIndex: 10,
+  },
+  gradient: {
+    flex: 1,
     paddingHorizontal: 20,
     borderRadius: 29,
-    backgroundColor: colors.pink,
     justifyContent: 'center',
-    shadowColor: '#000000',
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 5,
-    zIndex: 10,
   },
   lockup: {
     alignSelf: 'flex-start',

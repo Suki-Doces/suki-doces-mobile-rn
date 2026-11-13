@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
-import { colors } from '@/constants/colors';
+import { colors, gradients } from '@/constants/colors';
 import { partnerFeatures } from '@/constants/home';
 import type { PartnerIconName } from '@/interfaces/home';
 
@@ -23,7 +24,6 @@ function PartnerIcon({ name }: { name: PartnerIconName }) {
       </Svg>
     );
   }
-
   if (name === 'headset') {
     return (
       <Svg width={28} height={28} viewBox="0 0 24 24">
@@ -34,7 +34,6 @@ function PartnerIcon({ name }: { name: PartnerIconName }) {
       </Svg>
     );
   }
-
   return (
     <Svg width={28} height={28} viewBox="0 0 24 24">
       <Path {...strokeProps} d="M3 9.5 4.8 4h14.4L21 9.5" />
@@ -47,7 +46,12 @@ function PartnerIcon({ name }: { name: PartnerIconName }) {
 
 export function PartnerSection() {
   return (
-    <View style={styles.section}>
+    <LinearGradient
+      colors={gradients.partnerSection}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.section}
+    >
       <Text style={styles.heading}>Seja um Parceiro SukiDoces</Text>
       <Text style={styles.subtitle}>
         Ofereça as melhores sobremesas no seu estabelecimento com condições especiais para
@@ -57,21 +61,23 @@ export function PartnerSection() {
       <View style={styles.featuresList}>
         {partnerFeatures.map((feature) => (
           <View key={feature.title} style={styles.featureItem}>
-            <View style={styles.iconCircle}>
+            <LinearGradient
+              colors={['#ffd6e8', '#f8bad4'] as const}
+              style={styles.iconCircle}
+            >
               <PartnerIcon name={feature.icon} />
-            </View>
+            </LinearGradient>
             <Text style={styles.featureTitle}>{feature.title}</Text>
             <Text style={styles.featureDescription}>{feature.description}</Text>
           </View>
         ))}
       </View>
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   section: {
-    backgroundColor: '#fff0f7',
     paddingVertical: 32,
     paddingHorizontal: 24,
     alignItems: 'center',
@@ -104,10 +110,14 @@ const styles = StyleSheet.create({
     width: 66,
     height: 66,
     borderRadius: 33,
-    backgroundColor: '#f8bad4',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 4,
+    shadowColor: colors.pink,
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 2,
   },
   featureTitle: {
     color: colors.brown,

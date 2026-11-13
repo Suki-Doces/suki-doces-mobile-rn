@@ -1,16 +1,27 @@
 import { StyleSheet, Text, View } from 'react-native';
-
-import { colors } from '@/constants/colors';
+import { LinearGradient } from 'expo-linear-gradient';
+import { colors, gradients } from '@/constants/colors';
 import type { Milestone } from '@/interfaces/history';
 
 export function TimelineItem({ year, title, text }: Milestone) {
   return (
     <View style={styles.item}>
-      <Text style={styles.year}>{year}</Text>
-      <View style={styles.card}>
+      <LinearGradient
+        colors={gradients.timelineBadge}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.yearBadge}
+      >
+        <Text style={styles.yearText}>{year}</Text>
+      </LinearGradient>
+
+      <LinearGradient
+        colors={gradients.glassCard}
+        style={styles.card}
+      >
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.text}>{text}</Text>
-      </View>
+      </LinearGradient>
     </View>
   );
 }
@@ -20,17 +31,13 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     gap: 16,
   },
-  year: {
+  yearBadge: {
     minWidth: 90,
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 30,
-    backgroundColor: colors.timelinePink,
-    color: colors.white,
-    fontSize: 16,
-    lineHeight: 20,
-    textAlign: 'center',
-    fontWeight: '700',
+    alignItems: 'center',
+    justifyContent: 'center',
     shadowColor: colors.timelinePink,
     shadowOpacity: 0.4,
     shadowRadius: 8,
@@ -38,11 +45,19 @@ const styles = StyleSheet.create({
     elevation: 3,
     zIndex: 1,
   },
+  yearText: {
+    color: colors.white,
+    fontSize: 16,
+    lineHeight: 20,
+    textAlign: 'center',
+    fontWeight: '700',
+  },
   card: {
     width: '100%',
     padding: 24,
     borderRadius: 16,
-    backgroundColor: 'rgba(255,255,255,0.92)',
+    borderWidth: 1,
+    borderColor: 'rgba(241, 120, 182, 0.25)',
     shadowColor: '#000',
     shadowOpacity: 0.06,
     shadowRadius: 18,

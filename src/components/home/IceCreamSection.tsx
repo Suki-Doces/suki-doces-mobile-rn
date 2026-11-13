@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { colors } from '@/constants/colors';
+import { LinearGradient } from 'expo-linear-gradient';
+import { colors, gradients } from '@/constants/colors';
 import { iceCreamSteps } from '@/constants/home';
 
 export function IceCreamSection() {
@@ -9,28 +10,41 @@ export function IceCreamSection() {
   return (
     <View style={styles.section}>
       <Text style={styles.heading}>
-        Não é somente doces.{' '}
+        Não somente doces.{' '}
         <Text style={styles.headingHighlight}>Sorvetes e muito mais</Text>!
       </Text>
 
       <View style={styles.cardsList}>
         {iceCreamSteps.map((step) => (
-          <View key={step.id} style={styles.stepCard}>
+          <LinearGradient
+            key={step.id}
+            colors={gradients.catalogContainer}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.stepCard}
+          >
             <View style={styles.thumbPlaceholder} />
             <View style={styles.stepTextContent}>
               <Text style={styles.stepTitle}>{step.title}</Text>
               <Text style={styles.stepDescription}>{step.description}</Text>
             </View>
-          </View>
+          </LinearGradient>
         ))}
       </View>
 
       <Pressable
         accessibilityRole="button"
-        style={({ pressed }) => [styles.moreButton, pressed && styles.pressed]}
+        style={({ pressed }) => [styles.moreButtonWrapper, pressed && styles.pressed]}
         onPress={() => router.navigate('/history')}
       >
-        <Text style={styles.moreButtonText}>Saiba mais</Text>
+        <LinearGradient
+          colors={gradients.brandPink}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.moreButton}
+        >
+          <Text style={styles.moreButtonText}>Saiba mais</Text>
+        </LinearGradient>
       </Pressable>
     </View>
   );
@@ -60,7 +74,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 12,
     borderRadius: 14,
-    backgroundColor: '#fff0f7',
+    borderWidth: 1,
+    borderColor: 'rgba(241, 120, 182, 0.2)',
     gap: 12,
   },
   thumbPlaceholder: {
@@ -83,10 +98,17 @@ const styles = StyleSheet.create({
     fontSize: 11,
     lineHeight: 16,
   },
-  moreButton: {
+  moreButtonWrapper: {
     alignSelf: 'center',
     marginTop: 4,
-    backgroundColor: colors.pink,
+    borderRadius: 18,
+    shadowColor: colors.pink,
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 3,
+  },
+  moreButton: {
     paddingHorizontal: 26,
     paddingVertical: 9,
     borderRadius: 18,

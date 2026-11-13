@@ -1,29 +1,10 @@
 import { useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
-import Svg, { Circle, Path } from 'react-native-svg';
-import { colors } from '@/constants/colors';
+import { LinearGradient } from 'expo-linear-gradient';
+import { CandyPlaceholderIcon } from '@/components/home/CandyPlaceholderIcon';
+import { colors, gradients } from '@/constants/colors';
 import { quickProducts } from '@/constants/home';
 import type { QuickProduct, QuickTab } from '@/interfaces/home';
-
-function CandyPlaceholderIcon({ size = 56, color = '#6e7278' }: { size?: number; color?: string }) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 64 64" fill="none">
-      <Path
-        d="M52 28c0 12.15-9.85 22-22 22S8 40.15 8 28 17.85 6 30 6c2.4 0 4.7.38 6.86 1.09a7.5 7.5 0 0 0 7.45 8.41 7.47 7.47 0 0 0 6.5 4.82c.78 2.42 1.19 5 1.19 7.68Z"
-        stroke={color}
-        strokeWidth={3}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <Circle cx="28" cy="28" r="6" stroke={color} strokeWidth={2.5} />
-      <Circle cx="20" cy="20" r="1.8" fill={color} />
-      <Circle cx="21" cy="36" r="1.8" fill={color} />
-      <Circle cx="36" cy="38" r="1.8" fill={color} />
-      <Circle cx="35" cy="18" r="1.8" fill={color} />
-      <Circle cx="41" cy="29" r="1.8" fill={color} />
-    </Svg>
-  );
-}
 
 export function ShortCatalog() {
   const [activeTab, setActiveTab] = useState<QuickTab>('bestsellers');
@@ -49,35 +30,44 @@ export function ShortCatalog() {
   }
 
   return (
-    <View style={styles.container}>
+    <LinearGradient
+      colors={gradients.catalogContainer}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.container}
+    >
       <Text style={styles.heading}>Fazer uma compra rápida</Text>
 
-      {/* Abas Mais vendidos | Lançamentos */}
       <View style={styles.tabsRow}>
-        <Pressable
-          accessibilityRole="tab"
-          accessibilityState={{ selected: activeTab === 'bestsellers' }}
-          style={[styles.tabBtn, activeTab === 'bestsellers' && styles.tabBtnActive]}
-          onPress={() => setActiveTab('bestsellers')}
-        >
-          <Text style={[styles.tabText, activeTab === 'bestsellers' && styles.tabTextActive]}>
-            Mais vendidos
-          </Text>
-        </Pressable>
-
-        <Pressable
-          accessibilityRole="tab"
-          accessibilityState={{ selected: activeTab === 'releases' }}
-          style={[styles.tabBtn, activeTab === 'releases' && styles.tabBtnActive]}
-          onPress={() => setActiveTab('releases')}
-        >
-          <Text style={[styles.tabText, activeTab === 'releases' && styles.tabTextActive]}>
-            Lançamentos
-          </Text>
-        </Pressable>
+        {(['bestsellers', 'releases'] as const).map((tab) => {
+          const isSelected = activeTab === tab;
+          const label = tab === 'bestsellers' ? 'Mais vendidos' : 'Lançamentos';
+          return (
+            <Pressable
+              key={tab}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: isSelected }}
+              onPress={() => setActiveTab(tab)}
+            >
+              {isSelected ? (
+                <LinearGradient
+                  colors={gradients.brandPink}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.tabBtn}
+                >
+                  <Text style={[styles.tabText, styles.tabTextActive]}>{label}</Text>
+                </LinearGradient>
+              ) : (
+                <View style={styles.tabBtn}>
+                  <Text style={styles.tabText}>{label}</Text>
+                </View>
+              )}
+            </Pressable>
+          );
+        })}
       </View>
 
-      {/* Grelha 2x2 de Produtos */}
       <View style={styles.grid}>
         {visibleProducts.map((item) => {
           const qty = getQty(item.id);
@@ -86,13 +76,11 @@ export function ShortCatalog() {
               <View style={styles.iconBox}>
                 <CandyPlaceholderIcon size={54} color="#6e7278" />
               </View>
-
               <Text style={styles.productName} numberOfLines={2}>
                 {item.name}
               </Text>
               <Text style={styles.productPrice}>{item.price}</Text>
 
-              {/* Seletor de quantidade (- 1 +) */}
               <View style={styles.qtyRow}>
                 <Pressable
                   accessibilityRole="button"
@@ -102,9 +90,7 @@ export function ShortCatalog() {
                 >
                   <Text style={styles.qtyBtnText}>-</Text>
                 </Pressable>
-
                 <Text style={styles.qtyValue}>{qty}</Text>
-
                 <Pressable
                   accessibilityRole="button"
                   accessibilityLabel={`Aumentar quantidade de ${item.name}`}
@@ -115,20 +101,26 @@ export function ShortCatalog() {
                 </Pressable>
               </View>
 
-              {/* Botão Comprar */}
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={`Comprar ${item.name}`}
-                style={({ pressed }) => [styles.buyButton, pressed && styles.pressed]}
+                style={({ pressed }) => [pressed && styles.pressed]}
                 onPress={() => handleBuy(item)}
               >
-                <Text style={styles.buyButtonText}>Comprar</Text>
+                <LinearGradient
+                  colors={gradients.brandPink}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.buyButton}
+                >
+                  <Text style={styles.buyButtonText}>Comprar</Text>
+                </LinearGradient>
               </Pressable>
             </View>
           );
         })}
       </View>
-    </View>
+    </LinearGradient>
   );
 }
 
@@ -138,7 +130,8 @@ const styles = StyleSheet.create({
     paddingVertical: 22,
     paddingHorizontal: 12,
     borderRadius: 24,
-    backgroundColor: '#fde8f1',
+    borderWidth: 1,
+    borderColor: 'rgba(233, 34, 144, 0.12)',
     gap: 14,
   },
   heading: {
@@ -157,9 +150,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     borderRadius: 20,
     backgroundColor: colors.white,
-  },
-  tabBtnActive: {
-    backgroundColor: colors.pink,
   },
   tabText: {
     color: colors.brown,
@@ -181,16 +171,18 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 12,
     gap: 6,
-    shadowColor: '#000',
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 1,
+    shadowColor: colors.brown,
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 2,
   },
   iconBox: {
     height: 95,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: '#faf7f9',
+    borderRadius: 12,
   },
   productName: {
     color: colors.brown,
@@ -209,7 +201,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     borderWidth: 1,
-    borderColor: '#f0dce5',
+    borderColor: colors.borderPink,
     borderRadius: 12,
     paddingHorizontal: 8,
     paddingVertical: 3,
@@ -231,7 +223,6 @@ const styles = StyleSheet.create({
   },
   buyButton: {
     marginTop: 4,
-    backgroundColor: colors.pink,
     paddingVertical: 8,
     borderRadius: 16,
     alignItems: 'center',

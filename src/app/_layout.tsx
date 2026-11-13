@@ -1,7 +1,6 @@
 import { Tabs } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
-
 import { BottomNavigation } from '@/components/layout/BottomNavigation';
 import { colors } from '@/constants/colors';
 
@@ -13,13 +12,17 @@ export default function RootLayout() {
         style={styles.app}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-       <Tabs
+        <Tabs
           tabBar={() => <BottomNavigation />}
-          screenOptions={{ headerShown: false, sceneStyle: { backgroundColor: colors.white } }}
+          screenOptions={{
+            headerShown: false,
+            sceneStyle: { backgroundColor: colors.white },
+          }}
         >
           <Tabs.Screen name="index" />
           <Tabs.Screen name="contact" />
           <Tabs.Screen name="history" />
+          <Tabs.Screen name="login" />
         </Tabs>
       </KeyboardAvoidingView>
     </View>

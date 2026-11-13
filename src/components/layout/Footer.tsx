@@ -1,8 +1,8 @@
 import { useRouter } from 'expo-router';
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-
-import { colors } from '@/constants/colors';
+import { LinearGradient } from 'expo-linear-gradient';
+import { colors, gradients } from '@/constants/colors';
 import { footerCategories, footerInformationLinks, footerSocials } from '@/constants/footer';
 import { store } from '@/constants/store';
 
@@ -19,7 +19,12 @@ export function Footer() {
   const router = useRouter();
 
   return (
-    <View style={styles.footer}>
+    <LinearGradient
+      colors={gradients.footerDark}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 0, y: 1 }}
+      style={styles.footer}
+    >
       <View style={styles.logo}>
         <Text style={styles.logoName}>Suki</Text>
         <Text style={styles.logoTagline}>doces</Text>
@@ -51,19 +56,18 @@ export function Footer() {
       <Text style={styles.copyright}>
         <Text style={styles.copyrightBrand}>SukiDoces</Text>. Todos os direitos reservados.
       </Text>
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   footer: {
-    paddingTop: 24,
+    paddingTop: 28,
     paddingHorizontal: 20,
     paddingBottom: 112,
     gap: 10,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    backgroundColor: '#201613',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
   },
   logo: {
     alignSelf: 'center',
@@ -78,7 +82,7 @@ const styles = StyleSheet.create({
     letterSpacing: -2,
   },
   logoTagline: {
-    color: '#fff0fa',
+    color: colors.pinkLight,
     fontSize: 16,
     lineHeight: 18,
     fontWeight: '800',
@@ -86,7 +90,7 @@ const styles = StyleSheet.create({
     marginTop: -6,
   },
   list: {
-    gap: 3,
+    gap: 4,
     paddingVertical: 10,
   },
   heading: {
@@ -99,14 +103,16 @@ const styles = StyleSheet.create({
   link: {
     color: colors.white,
     fontSize: 14,
-    lineHeight: 19,
+    lineHeight: 20,
     fontWeight: '600',
   },
   about: {
-    padding: 12,
+    padding: 14,
     gap: 10,
-    borderRadius: 10,
-    backgroundColor: 'rgba(0,0,0,0.25)',
+    borderRadius: 12,
+    backgroundColor: 'rgba(0,0,0,0.32)',
+    borderWidth: 1,
+    borderColor: 'rgba(247, 181, 204, 0.15)',
   },
   contact: {
     color: colors.white,

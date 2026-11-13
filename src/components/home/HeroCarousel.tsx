@@ -10,8 +10,9 @@ import {
   Text,
   View,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { CandyPlaceholderIcon } from '@/components/home/CandyPlaceholderIcon';
-import { colors } from '@/constants/colors';
+import { colors, gradients } from '@/constants/colors';
 import { carouselProducts } from '@/constants/home';
 import type { CarouselProduct } from '@/interfaces/home';
 
@@ -56,12 +57,20 @@ export function HeroCarousel() {
           onScroll={handleScroll}
           scrollEventThrottle={16}
           renderItem={({ item }) => (
-            <View style={styles.card}>
+            <LinearGradient
+              colors={gradients.carouselCardBg}
+              style={styles.card}
+            >
               <View style={styles.iconArea}>
                 <CandyPlaceholderIcon size={58} color="#4f545c" />
               </View>
 
-              <View style={styles.cardFooter}>
+              <LinearGradient
+                colors={gradients.carouselOverlay}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 0, y: 1 }}
+                style={styles.cardFooter}
+              >
                 <Text style={styles.rankText}>{item.rankLabel}</Text>
                 <Text style={styles.productTitle} numberOfLines={2}>
                   {item.name}
@@ -71,18 +80,24 @@ export function HeroCarousel() {
                   <Text style={styles.price}>{item.price}</Text>
                   <Pressable
                     accessibilityRole="button"
-                    style={({ pressed }) => [styles.buyBtn, pressed && styles.pressed]}
+                    style={({ pressed }) => [pressed && styles.pressed]}
                     onPress={() => Alert.alert('Comprar', `${item.name} adicionado!`)}
                   >
-                    <Text style={styles.buyBtnText}>Comprar</Text>
+                    <LinearGradient
+                      colors={gradients.brandPink}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
+                      style={styles.buyBtn}
+                    >
+                      <Text style={styles.buyBtnText}>Comprar</Text>
+                    </LinearGradient>
                   </Pressable>
                 </View>
-              </View>
-            </View>
+              </LinearGradient>
+            </LinearGradient>
           )}
         />
 
-        {/* Botões laterais (< e >) */}
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Anterior"
@@ -102,7 +117,6 @@ export function HeroCarousel() {
         </Pressable>
       </View>
 
-      {/* Indicadores (dots) */}
       <View style={styles.dotsRow}>
         {carouselProducts.map((item, idx) => (
           <View
@@ -134,12 +148,16 @@ const styles = StyleSheet.create({
   card: {
     width: CARD_WIDTH,
     height: 185,
-    borderRadius: 14,
+    borderRadius: 16,
     borderWidth: 1.5,
-    borderColor: '#f178b6',
-    backgroundColor: '#d9dbe0',
+    borderColor: colors.timelinePink,
     overflow: 'hidden',
     justifyContent: 'space-between',
+    shadowColor: colors.pink,
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
   },
   iconArea: {
     flex: 1,
@@ -149,14 +167,14 @@ const styles = StyleSheet.create({
   },
   cardFooter: {
     paddingHorizontal: 12,
-    paddingVertical: 10,
-    backgroundColor: 'rgba(45, 42, 46, 0.78)',
+    paddingTop: 14,
+    paddingBottom: 10,
     gap: 2,
   },
   rankText: {
-    color: '#e0e0e0',
+    color: colors.pinkLight,
     fontSize: 10,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   productTitle: {
     color: colors.white,
@@ -176,7 +194,6 @@ const styles = StyleSheet.create({
     fontWeight: '900',
   },
   buyBtn: {
-    backgroundColor: colors.pink,
     paddingHorizontal: 18,
     paddingVertical: 6,
     borderRadius: 16,
@@ -191,12 +208,17 @@ const styles = StyleSheet.create({
   },
   navArrow: {
     position: 'absolute',
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    backgroundColor: 'rgba(255,255,255,0.85)',
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255,255,255,0.9)',
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
     zIndex: 5,
   },
   navArrowLeft: {
@@ -209,7 +231,7 @@ const styles = StyleSheet.create({
     color: colors.brown,
     fontSize: 18,
     lineHeight: 20,
-    fontWeight: '700',
+    fontWeight: '800',
   },
   dotsRow: {
     flexDirection: 'row',
@@ -218,14 +240,14 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   dot: {
-    width: 5,
-    height: 5,
-    borderRadius: 2.5,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
     backgroundColor: '#d8c2cc',
   },
   dotActive: {
     backgroundColor: colors.pink,
-    width: 6,
+    width: 16,
     height: 6,
     borderRadius: 3,
   },

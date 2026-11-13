@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { colors } from '@/constants/colors';
+import { LinearGradient } from 'expo-linear-gradient';
+import { colors, gradients } from '@/constants/colors';
 
 export function AboutCallout() {
   const router = useRouter();
@@ -13,13 +14,19 @@ export function AboutCallout() {
         verdadeiras experiências de sabor. Cada doce conta um pouquinho da nossa história.
         Seja bem-vindo à Suki Doces.
       </Text>
-
       <Pressable
         accessibilityRole="button"
-        style={({ pressed }) => [styles.button, pressed && styles.pressed]}
+        style={({ pressed }) => [styles.buttonWrapper, pressed && styles.pressed]}
         onPress={() => router.navigate('/history')}
       >
-        <Text style={styles.buttonText}>Ver catálogo</Text>
+        <LinearGradient
+          colors={gradients.brandPink}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.button}
+        >
+          <Text style={styles.buttonText}>Ver catálogo</Text>
+        </LinearGradient>
       </Pressable>
     </View>
   );
@@ -43,10 +50,17 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 18,
   },
-  button: {
+  buttonWrapper: {
     alignSelf: 'flex-start',
     marginTop: 4,
-    backgroundColor: colors.pink,
+    borderRadius: 20,
+    shadowColor: colors.pink,
+    shadowOpacity: 0.28,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 3,
+  },
+  button: {
     paddingHorizontal: 22,
     paddingVertical: 9,
     borderRadius: 20,

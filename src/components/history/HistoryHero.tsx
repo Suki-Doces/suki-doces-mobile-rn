@@ -1,30 +1,34 @@
-import { StyleSheet, Text, View } from 'react-native';
-
-import { colors } from '@/constants/colors';
+import { StyleSheet, Text } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { colors, gradients } from '@/constants/colors';
 
 export function HistoryHero() {
   return (
-    <View style={styles.hero}>
+    <LinearGradient
+      colors={gradients.softPinkSection}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 0, y: 1 }}
+      style={styles.hero}
+    >
       <Text style={styles.title}>A Essência da Suki Doces</Text>
       <Text style={styles.subtitle}>Doces que encantam, momentos que marcam.</Text>
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   hero: {
-    paddingVertical: 80,
+    paddingVertical: 72,
     paddingHorizontal: 16,
     alignItems: 'center',
-    backgroundColor: colors.pinkPale,
     borderBottomColor: colors.timelinePink,
     borderBottomWidth: 2,
   },
   title: {
     color: colors.brown,
-    fontSize: 35,
+    fontSize: 34,
     lineHeight: 42,
-    fontWeight: '700',
+    fontWeight: '800',
     textAlign: 'center',
     marginBottom: 8,
   },

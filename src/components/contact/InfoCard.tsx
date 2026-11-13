@@ -1,15 +1,20 @@
 import { StyleSheet, Text, View } from 'react-native';
-
+import { LinearGradient } from 'expo-linear-gradient';
 import { Icon } from '@/components/ui/Icon';
-import { colors } from '@/constants/colors';
+import { colors, gradients } from '@/constants/colors';
 import type { ContactMethod } from '@/interfaces/contact';
 
 export function InfoCard({ icon, title, lines }: ContactMethod) {
   return (
     <View style={styles.card}>
-      <View style={styles.icon}>
+      <LinearGradient
+        colors={gradients.brandPink}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.icon}
+      >
         <Icon name={icon} color={colors.white} size={24} />
-      </View>
+      </LinearGradient>
       <View style={styles.text}>
         <Text style={styles.title}>{title}</Text>
         {lines.map((line) => (
@@ -22,13 +27,15 @@ export function InfoCard({ icon, title, lines }: ContactMethod) {
 
 const styles = StyleSheet.create({
   card: {
-    minHeight: 125,
-    padding: 20,
+    minHeight: 115,
+    padding: 18,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 18,
     borderRadius: 16,
-    backgroundColor: 'rgba(255,255,255,0.72)',
+    backgroundColor: 'rgba(255,255,255,0.78)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.9)',
   },
   icon: {
     width: 50,
@@ -36,7 +43,6 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.pink,
     shadowColor: colors.pink,
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -47,15 +53,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    color: '#050505',
+    color: colors.brown,
     fontSize: 18,
     lineHeight: 23,
     fontWeight: '700',
     marginBottom: 4,
   },
   line: {
-    color: '#222',
-    fontSize: 15,
-    lineHeight: 21,
+    color: colors.text,
+    fontSize: 14,
+    lineHeight: 20,
   },
 });
