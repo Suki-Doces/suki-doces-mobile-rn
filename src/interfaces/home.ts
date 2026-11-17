@@ -2,6 +2,15 @@ export type QuickTab = 'bestsellers' | 'releases';
 
 export type PartnerIconName = 'truck' | 'headset' | 'store';
 
+export interface ProductItem {
+  id: string;
+  name: string;
+  description: string;
+  price: string;
+  image: string;
+  category: string;
+}
+
 export interface CarouselProduct {
   id: string;
   rankLabel: string;

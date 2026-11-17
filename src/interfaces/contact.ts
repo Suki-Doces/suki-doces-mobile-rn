@@ -19,3 +19,15 @@ export interface ContactFormValues {
   subject: Subject;
   message: string;
 }
+
+export interface ContactMessageItem {
+  id_contato: number;
+  nome: string;
+  email: string;
+  telefone: string;
+  assunto: string;
+  mensagem: string;
+  data_criacao?: string;
+  respondido?: boolean;
+  resposta?: string | null;
+}

@@ -1,16 +1,43 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { CandyPlaceholderIcon } from '@/components/home/CandyPlaceholderIcon';
 import { colors, gradients } from '@/constants/colors';
-import { quickProducts } from '@/constants/home';
+import { quickProducts as fallbackProducts } from '@/constants/home';
+import { productService } from '@/services/productService'; // Ajuste o caminho se necessário
 import type { QuickProduct, QuickTab } from '@/interfaces/home';
 
 export function ShortCatalog() {
   const [activeTab, setActiveTab] = useState<QuickTab>('bestsellers');
   const [quantities, setQuantities] = useState<Record<string, number>>({});
+  const [products, setProducts] = useState<QuickProduct[]>(fallbackProducts);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const visibleProducts = quickProducts.filter((item) => item.tab === activeTab);
+  useEffect(() => {
+    productService
+      .getProducts()
+      .then((apiItems) => {
+        if (apiItems && apiItems.length > 0) {
+          // Mapeia os produtos da API para o formato de compra rápida do ShortCatalog
+          const mapped: QuickProduct[] = apiItems.map((item, index) => ({
+            id: String(item.id),
+            name: item.name,
+            price: item.price,
+            // Distribui dinamicamente entre bestsellers e releases com base no índice
+            tab: index % 2 === 0 ? 'bestsellers' : 'releases',
+          }));
+          setProducts(mapped);
+        }
+      })
+      .catch((err) => {
+        console.warn('Erro ao buscar produtos da API para o ShortCatalog, usando fallback:', err);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, []);
+
+  const visibleProducts = products.filter((item) => item.tab === activeTab);
 
   function getQty(id: string) {
     return quantities[id] ?? 1;

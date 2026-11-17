@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Alert,
   Dimensions,
@@ -13,7 +13,8 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { CandyPlaceholderIcon } from '@/components/home/CandyPlaceholderIcon';
 import { colors, gradients } from '@/constants/colors';
-import { carouselProducts } from '@/constants/home';
+import { carouselProducts as fallbackCarousel } from '@/constants/home';
+import { productService, ApiProduct } from '@/services/productService'; // Ajuste o caminho se necessário
 import type { CarouselProduct } from '@/interfaces/home';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -24,17 +25,42 @@ const SIDE_PADDING = Math.round((SCREEN_WIDTH - CARD_WIDTH) / 2);
 export function HeroCarousel() {
   const listRef = useRef<FlatList<CarouselProduct>>(null);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [products, setProducts] = useState<CarouselProduct[]>(fallbackCarousel);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    productService
+      .getProducts()
+      .then((apiItems) => {
+        if (apiItems && apiItems.length > 0) {
+          // Mapeia os dados da API para o formato esperado pelo carrossel
+          const mapped: CarouselProduct[] = apiItems.slice(0, 5).map((item, index) => ({
+            id: String(item.id),
+            rankLabel: index === 0 ? 'Mais Vendido' : `${index + 1}º Destaque`,
+            name: item.name,
+            price: item.price,
+          }));
+          setProducts(mapped);
+        }
+      })
+      .catch((err) => {
+        console.warn('Erro ao carregar carrossel da API, usando fallback local:', err);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, []);
 
   function handleScroll(event: NativeSyntheticEvent<NativeScrollEvent>) {
     const offsetX = event.nativeEvent.contentOffset.x;
     const index = Math.round(offsetX / (CARD_WIDTH + CARD_GAP));
-    if (index >= 0 && index < carouselProducts.length && index !== activeIndex) {
+    if (index >= 0 && index < products.length && index !== activeIndex) {
       setActiveIndex(index);
     }
   }
 
   function scrollToIndex(index: number) {
-    const clamped = Math.max(0, Math.min(index, carouselProducts.length - 1));
+    const clamped = Math.max(0, Math.min(index, products.length - 1));
     listRef.current?.scrollToOffset({
       offset: clamped * (CARD_WIDTH + CARD_GAP),
       animated: true,
@@ -47,7 +73,7 @@ export function HeroCarousel() {
       <View style={styles.carouselRow}>
         <FlatList
           ref={listRef}
-          data={carouselProducts}
+          data={products}
           keyExtractor={(item) => item.id}
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -57,10 +83,7 @@ export function HeroCarousel() {
           onScroll={handleScroll}
           scrollEventThrottle={16}
           renderItem={({ item }) => (
-            <LinearGradient
-              colors={gradients.carouselCardBg}
-              style={styles.card}
-            >
+            <LinearGradient colors={gradients.carouselCardBg} style={styles.card}>
               <View style={styles.iconArea}>
                 <CandyPlaceholderIcon size={58} color="#4f545c" />
               </View>
@@ -81,7 +104,7 @@ export function HeroCarousel() {
                   <Pressable
                     accessibilityRole="button"
                     style={({ pressed }) => [pressed && styles.pressed]}
-                    onPress={() => Alert.alert('Comprar', `${item.name} adicionado!`)}
+                    onPress={() => Alert.alert('Carrinho', `${item.name} adicionado!`)}
                   >
                     <LinearGradient
                       colors={gradients.brandPink}
@@ -118,7 +141,7 @@ export function HeroCarousel() {
       </View>
 
       <View style={styles.dotsRow}>
-        {carouselProducts.map((item, idx) => (
+        {products.map((item, idx) => (
           <View
             key={item.id}
             style={[styles.dot, idx === activeIndex && styles.dotActive]}

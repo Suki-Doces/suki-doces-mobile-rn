@@ -4,11 +4,25 @@ import { SubjectSelector } from '@/components/contact/SubjectSelector';
 import { FieldLabel } from '@/components/ui/FieldLabel';
 import { FormField } from '@/components/ui/FormField';
 import { colors } from '@/constants/colors';
-import { useContactForm } from '@/hooks/useContactForm';
+import type { ContactFormValues } from '@/interfaces/contact';
 
-export function ContactForm() {
-  const { values, error, success, setField, submit } = useContactForm();
+interface ContactFormProps {
+  values: ContactFormValues;
+  error: string;
+  successMessage: string;
+  isSubmitting: boolean;
+  setField: <K extends keyof ContactFormValues>(field: K, value: ContactFormValues[K]) => void;
+  submit: () => void;
+}
 
+export function ContactForm({
+  values,
+  error,
+  successMessage,
+  isSubmitting,
+  setField,
+  submit,
+}: ContactFormProps) {
   return (
     <View style={styles.card}>
       <FormField
@@ -55,18 +69,24 @@ export function ContactForm() {
       />
 
       {error ? <Text accessibilityRole="alert" style={styles.error}>{error}</Text> : null}
-      {success ? (
+      {successMessage ? (
         <Text accessibilityRole="alert" style={styles.success}>
-          Campos validados. O envio real precisa ser conectado à API do site.
+          {successMessage}
         </Text>
       ) : null}
 
       <Pressable
         accessibilityRole="button"
-        style={({ pressed }) => [styles.submit, pressed && styles.submitPressed]}
+        disabled={isSubmitting}
+        style={({ pressed }) => [
+          styles.submit,
+          (pressed || isSubmitting) && styles.submitPressed,
+        ]}
         onPress={submit}
       >
-        <Text style={styles.submitLabel}>Enviar Mensagem</Text>
+        <Text style={styles.submitLabel}>
+          {isSubmitting ? 'Enviando...' : 'Enviar Mensagem'}
+        </Text>
       </Pressable>
     </View>
   );
