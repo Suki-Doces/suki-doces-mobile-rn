@@ -1,29 +1,34 @@
 import { useEffect, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Alert, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { CandyPlaceholderIcon } from '@/components/home/CandyPlaceholderIcon';
+import { Icon } from '@/components/ui/Icon';
 import { colors, gradients } from '@/constants/colors';
 import { quickProducts as fallbackProducts } from '@/constants/home';
-import { productService } from '@/services/productService'; // Ajuste o caminho se necessário
 import type { QuickProduct, QuickTab } from '@/interfaces/home';
+import { cartStore } from '@/services/cartStore';
+import { productService } from '@/services/productService';
+import { sessionStore } from '@/services/session';
 
 export function ShortCatalog() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<QuickTab>('bestsellers');
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [products, setProducts] = useState<QuickProduct[]>(fallbackProducts);
-  const [isLoading, setIsLoading] = useState(true);
+  const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     productService
       .getProducts()
       .then((apiItems) => {
         if (apiItems && apiItems.length > 0) {
-          // Mapeia os produtos da API para o formato de compra rápida do ShortCatalog
           const mapped: QuickProduct[] = apiItems.map((item, index) => ({
             id: String(item.id),
+            productId: item.productId,
             name: item.name,
             price: item.price,
-            // Distribui dinamicamente entre bestsellers e releases com base no índice
+            image: item.image,
             tab: index % 2 === 0 ? 'bestsellers' : 'releases',
           }));
           setProducts(mapped);
@@ -31,9 +36,6 @@ export function ShortCatalog() {
       })
       .catch((err) => {
         console.warn('Erro ao buscar produtos da API para o ShortCatalog, usando fallback:', err);
-      })
-      .finally(() => {
-        setIsLoading(false);
       });
   }, []);
 
@@ -51,9 +53,28 @@ export function ShortCatalog() {
     });
   }
 
-  function handleBuy(product: QuickProduct) {
+  async function handleBuy(product: QuickProduct) {
     const qty = getQty(product.id);
-    Alert.alert('Carrinho', `${qty}x ${product.name} (${product.price}) adicionado ao carrinho!`);
+    if (!product.productId) {
+      Alert.alert('Indisponível', 'Este produto é só um exemplo. Conecte o app à API para comprar.');
+      return;
+    }
+    if (!sessionStore.get()) {
+      Alert.alert('Entre na sua conta', 'Faça login para adicionar produtos ao carrinho.', [
+        { text: 'Agora não', style: 'cancel' },
+        { text: 'Entrar', onPress: () => router.push('/login') },
+      ]);
+      return;
+    }
+    try {
+      await cartStore.add(product.productId, qty);
+      Alert.alert('Carrinho', `${qty}x ${product.name} adicionado ao carrinho!`, [
+        { text: 'Continuar comprando', style: 'cancel' },
+        { text: 'Ver carrinho', onPress: () => router.push('/(tabs)/cart') },
+      ]);
+    } catch (error) {
+      Alert.alert('Não foi possível adicionar', (error as Error).message);
+    }
   }
 
   return (
@@ -98,14 +119,36 @@ export function ShortCatalog() {
       <View style={styles.grid}>
         {visibleProducts.map((item) => {
           const qty = getQty(item.id);
+          const hasValidImage =
+            !!item.image &&
+            item.image.startsWith('http') &&
+            !failedImages[item.id];
+
           return (
             <View key={item.id} style={styles.card}>
-              <View style={styles.iconBox}>
-                <CandyPlaceholderIcon size={54} color="#6e7278" />
-              </View>
-              <Text style={styles.productName} numberOfLines={2}>
-                {item.name}
-              </Text>
+              <Pressable
+                onPress={() => item.productId && router.push(`/product/${item.id}`)}
+              >
+                <View style={styles.iconBox}>
+                  {hasValidImage ? (
+                    <Image
+                      source={{ uri: item.image }}
+                      style={styles.productImage}
+                      resizeMode="cover"
+                      onError={() =>
+                        setFailedImages((prev) => ({ ...prev, [item.id]: true }))
+                      }
+                    />
+                  ) : (
+                    <CandyPlaceholderIcon size={54} color="#6e7278" />
+                  )}
+                </View>
+
+                <Text style={styles.productName} numberOfLines={2}>
+                  {item.name}
+                </Text>
+              </Pressable>
+
               <Text style={styles.productPrice}>{item.price}</Text>
 
               <View style={styles.qtyRow}>
@@ -115,7 +158,7 @@ export function ShortCatalog() {
                   style={styles.qtyBtn}
                   onPress={() => changeQty(item.id, -1)}
                 >
-                  <Text style={styles.qtyBtnText}>-</Text>
+                  <Icon name="minus" size={13} color={colors.pink} />
                 </Pressable>
                 <Text style={styles.qtyValue}>{qty}</Text>
                 <Pressable
@@ -124,7 +167,7 @@ export function ShortCatalog() {
                   style={styles.qtyBtn}
                   onPress={() => changeQty(item.id, 1)}
                 >
-                  <Text style={styles.qtyBtnText}>+</Text>
+                  <Icon name="plus" size={13} color={colors.pink} />
                 </Pressable>
               </View>
 
@@ -205,11 +248,17 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   iconBox: {
-    height: 95,
+    height: 110,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#faf7f9',
     borderRadius: 12,
+    overflow: 'hidden',
+    marginBottom: 6,
+  },
+  productImage: {
+    width: '100%',
+    height: '100%',
   },
   productName: {
     color: colors.brown,
@@ -231,17 +280,12 @@ const styles = StyleSheet.create({
     borderColor: colors.borderPink,
     borderRadius: 12,
     paddingHorizontal: 8,
-    paddingVertical: 3,
+    paddingVertical: 4,
     marginTop: 2,
   },
   qtyBtn: {
     paddingHorizontal: 6,
     paddingVertical: 2,
-  },
-  qtyBtnText: {
-    color: colors.pink,
-    fontSize: 14,
-    fontWeight: '700',
   },
   qtyValue: {
     color: colors.brown,

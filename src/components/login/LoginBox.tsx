@@ -12,6 +12,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { SukiLoginLogo } from '@/components/login/SukiLoginLogo';
 import { colors, gradients } from '@/constants/colors';
+import { authService } from '@/services/authService';
 
 type FocusedField =
     | 'login-email'
@@ -42,6 +43,7 @@ export function LoginBox() {
     const [isLoginMode, setIsLoginMode] = useState<boolean>(true);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [errorMessage, setErrorMessage] = useState<string>('');
+    const [infoMessage, setInfoMessage] = useState<string>('');
     const [focusedField, setFocusedField] = useState<FocusedField>(null);
     const [switchWidth, setSwitchWidth] = useState<number>(0);
 
@@ -119,8 +121,9 @@ export function LoginBox() {
 
     const isSubmitDisabled = isLoading || (isLoginMode ? !isLoginFormValid : !isRegisterFormValid);
 
-    function onSubmit() {
+    async function onSubmit() {
         setErrorMessage('');
+        setInfoMessage('');
 
         if (!isLoginMode && formData.senha !== formData.confirmar_senha) {
             setErrorMessage('As senhas não coincidem.');
@@ -129,11 +132,37 @@ export function LoginBox() {
 
         setIsLoading(true);
 
-        // Simulação da chamada ao AuthService + sincronização do CartService
-        setTimeout(() => {
+        try {
+            if (isLoginMode) {
+                // Mesma conta do site: o carrinho e os pedidos são carregados do servidor.
+                await authService.login(formData.email, formData.senha);
+                router.navigate('/');
+            } else {
+                const result = await authService.register({
+                    nome: formData.nome,
+                    telefone: formData.telefone,
+                    email: formData.email,
+                    senha: formData.senha,
+                });
+                if (result.status === 'verification-pending') {
+                    setIsLoginMode(true);
+                    setInfoMessage('Conta criada! Confirme o seu e-mail pelo link enviado e depois entre.');
+                } else {
+                    router.navigate('/');
+                }
+            }
+        } catch (error) {
+            const message = (error as Error).message;
+            setErrorMessage(
+                isLoginMode
+                    ? message === 'Invalid credentials' ? 'E-mail ou senha incorretos.' : message
+                    : message === 'Email already registered'
+                      ? 'E-mail já cadastrado. Faça o login ou use outro e-mail.'
+                      : message,
+            );
+        } finally {
             setIsLoading(false);
-            router.navigate('/');
-        }, 900);
+        }
     }
 
     const sliderTranslateX = slideAnim.interpolate({
@@ -378,6 +407,12 @@ export function LoginBox() {
                             <Text style={styles.errorText}>{errorMessage}</Text>
                         </View>
                     ) : null}
+
+                    {infoMessage ? (
+                        <View style={styles.infoBox}>
+                            <Text style={styles.infoText}>{infoMessage}</Text>
+                        </View>
+                    ) : null}
                 </Animated.View>
             </View>
         </View>
@@ -526,6 +561,20 @@ const styles = StyleSheet.create({
     },
     errorText: {
         color: '#dc3545', // var(--gls-danger-btn)
+        fontWeight: '700',
+        textAlign: 'center',
+        fontSize: 14,
+    },
+    infoBox: {
+        marginTop: 15,
+        backgroundColor: '#e8f7ee',
+        padding: 10,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#b7e4c7',
+    },
+    infoText: {
+        color: '#2d6a4f',
         fontWeight: '700',
         textAlign: 'center',
         fontSize: 14,

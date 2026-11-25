@@ -3,7 +3,6 @@ import { StyleSheet } from 'react-native';
 import { HistoryHero } from '@/components/history/HistoryHero';
 import { StorySection } from '@/components/history/StorySection';
 import { Timeline } from '@/components/history/Timeline';
-import { Footer } from '@/components/layout/Footer';
 import { Screen } from '@/components/layout/Screen';
 
 export default function HistoryScreen() {
@@ -12,7 +11,6 @@ export default function HistoryScreen() {
       <HistoryHero />
       <StorySection />
       <Timeline />
-      <Footer />
     </Screen>
   );
 }

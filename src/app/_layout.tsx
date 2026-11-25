@@ -1,37 +1,31 @@
-import { Tabs } from 'expo-router';
+// src/app/_layout.tsx
+import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
-import { BottomNavigation } from '@/components/layout/BottomNavigation';
-import { colors } from '@/constants/colors';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { AiChatFab } from '../components/chat/AiChatModal';
 
 export default function RootLayout() {
   return (
-    <View style={styles.app}>
+    <SafeAreaProvider>
       <StatusBar style="dark" />
-      <KeyboardAvoidingView
-        style={styles.app}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      <Stack
+        screenOptions={{
+          headerBackTitle: 'Voltar',
+          headerShadowVisible: false,
+          contentStyle: { backgroundColor: '#FAF7F9' },
+        }}
       >
-        <Tabs
-          tabBar={() => <BottomNavigation />}
-          screenOptions={{
-            headerShown: false,
-            sceneStyle: { backgroundColor: colors.white },
-          }}
-        >
-          <Tabs.Screen name="index" />
-          <Tabs.Screen name="contact" />
-          <Tabs.Screen name="history" />
-          <Tabs.Screen name="login" />
-        </Tabs>
-      </KeyboardAvoidingView>
-    </View>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="product/[id]" options={{ title: '', headerTransparent: true }} />
+        <Stack.Screen name="checkout" options={{ title: 'Finalizar Pedido' }} />
+        <Stack.Screen name="orders" options={{ title: 'Meus Pedidos' }} />
+        <Stack.Screen name="contact" options={{ title: 'Fale Conosco' }} />
+        <Stack.Screen name="history" options={{ title: 'Nossa História' }} />
+        <Stack.Screen name="verify-email" options={{ title: 'Verificar E-mail' }} />
+        <Stack.Screen name="login" options={{ presentation: 'modal', title: 'Entrar' }} />
+      </Stack>
+
+      <AiChatFab />
+    </SafeAreaProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  app: {
-    flex: 1,
-    backgroundColor: colors.white,
-  },
-});

@@ -1,5 +1,4 @@
 import { StyleSheet, View } from 'react-native';
-import { Footer } from '@/components/layout/Footer';
 import { Screen } from '@/components/layout/Screen';
 import { LoginBox } from '@/components/login/LoginBox';
 import { LoginHighlights } from '@/components/login/LoginHighlights';
@@ -13,7 +12,6 @@ export default function LoginScreen() {
             Se quiser ocultar no mobile, basta remover a linha abaixo: */}
                 <LoginHighlights />
             </View>
-            <Footer />
         </Screen>
     );
 }

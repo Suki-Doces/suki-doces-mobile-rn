@@ -2,7 +2,6 @@ import { ContactCards } from '@/components/contact/ContactCards';
 import { ContactForm } from '@/components/contact/ContactForm';
 import { ContactHeading } from '@/components/contact/ContactHeading';
 import { MessageHistoryCard } from '@/components/contact/MessageHistoryCard';
-import { Footer } from '@/components/layout/Footer';
 import { Screen } from '@/components/layout/Screen';
 import { useContactForm } from '@/hooks/useContactForm';
 
@@ -31,7 +30,6 @@ export default function ContactScreen() {
         submit={submit}
       />
       <MessageHistoryCard messages={messages} isLoading={isLoading} />
-      <Footer />
     </Screen>
   );
 }

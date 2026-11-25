@@ -7,6 +7,7 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  type ScrollViewInstance,
   StyleSheet,
   Text,
   TextInput,
@@ -15,13 +16,10 @@ import {
 import { GlassView } from 'expo-glass-effect';
 import { Icon } from '@/components/ui/Icon';
 import { colors } from '@/constants/colors';
-
-interface UserProfile {
-  id?: number;
-  nome: string;
-  foto_perfil?: string | null;
-  role?: 'admin' | 'user';
-}
+import { useCart } from '@/hooks/useCart';
+import { useSession } from '@/hooks/useSession';
+import { apiFetch } from '@/services/api';
+import { authService } from '@/services/authService';
 
 interface ChatMessage {
   role: 'user' | 'bot';
@@ -32,8 +30,9 @@ export function BottomNavigation() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  // Sessão real (mesma conta do site) e carrinho lido do servidor.
+  const { user, isLoggedIn } = useSession();
+  const cart = useCart();
   const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
   const [displayName, setDisplayName] = useState<string>('Perfil');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -41,12 +40,13 @@ export function BottomNavigation() {
 
   const [viewProductsBtn, setViewProductsBtn] = useState<boolean>(true);
   const [viewHomeBtn, setViewHomeBtn] = useState<boolean>(false);
-  const [cartTotal] = useState<number>(0);
+  // Carrinho vazio não mostra valor (a API soma o frete mesmo sem itens).
+  const cartTotal = cart.itemCount > 0 ? cart.total : 0;
 
   const [mensagemUsuario, setMensagemUsuario] = useState<string>('');
   const [historico, setHistorico] = useState<ChatMessage[]>([]);
   const [carregando, setCarregando] = useState<boolean>(false);
-  const chatScrollRef = useRef<ScrollView>(null);
+  const chatScrollRef = useRef<ScrollViewInstance>(null);
 
   const dropdownAnim = useRef(new Animated.Value(0)).current;
 
@@ -56,13 +56,11 @@ export function BottomNavigation() {
 
   useEffect(() => {
     if (user) {
-      setIsLoggedIn(true);
       const parts = user.nome.trim().split(' ');
       setDisplayName(
         parts.length > 1 ? `${parts[0]} ${parts[parts.length - 1]}` : parts[0]
       );
     } else {
-      setIsLoggedIn(false);
       setDisplayName('Perfil');
     }
   }, [user]);
@@ -128,31 +126,34 @@ export function BottomNavigation() {
     if (!mensagemUsuario.trim() || carregando) return;
     const textoEnviado = mensagemUsuario.trim();
     setMensagemUsuario('');
+    // Histórico no formato do Gemini, igual ao enviado pelo site.
+    const history = historico.map((msg) => ({
+      role: msg.role === 'bot' ? 'model' : 'user',
+      parts: [{ text: msg.text }],
+    }));
     setHistorico((prev) => [...prev, { role: 'user', text: textoEnviado }]);
     setCarregando(true);
 
-    setTimeout(() => {
-      setHistorico((prev) => [
-        ...prev,
-        {
-          role: 'bot',
-          text: `Encontrei opções deliciosas na SukiDoces para "${textoEnviado}"! Posso te mostrar nosso catálogo ou ajudar com o pedido.`,
-        },
-      ]);
-      setCarregando(false);
-      setTimeout(() => chatScrollRef.current?.scrollToEnd({ animated: true }), 50);
-    }, 600);
+    apiFetch<{ response: string }>('/chat', {
+      method: 'POST',
+      body: JSON.stringify({ message: textoEnviado, history }),
+    })
+      .then((res) => res.response)
+      .catch(() => 'Desculpe, não consegui responder agora. Tente novamente em instantes.')
+      .then((text) => {
+        setHistorico((prev) => [...prev, { role: 'bot', text }]);
+        setCarregando(false);
+        setTimeout(() => chatScrollRef.current?.scrollToEnd({ animated: true }), 50);
+      });
   }
 
   function logout(): void {
-    setUser(null);
-    setIsLoggedIn(false);
     setOpenMenu(null);
-    router.navigate('/login');
+    void authService.logout().finally(() => router.navigate('/login'));
   }
 
   function isAdmin(): boolean {
-    return user?.role === 'admin';
+    return user?.nivel === 'admin';
   }
 
   function navigateAndClose(href: Href): void {
@@ -360,7 +361,7 @@ export function BottomNavigation() {
                         ]}
                         onPress={() => {
                           closeMenu();
-                          Alert.alert('Painel Admin', 'Abrindo Dashboard Admin...');
+                          Alert.alert('Painel Admin', 'O painel administrativo fica no site: lá aparecem os pedidos feitos no app e no site.');
                         }}
                       >
                         <Text style={styles.hnvPpLinksText}>Painel Admin</Text>
@@ -374,10 +375,7 @@ export function BottomNavigation() {
                       styles.hnvPpLinks,
                       pressed ? styles.hnvPpLinksHover : null,
                     ]}
-                    onPress={() => {
-                      closeMenu();
-                      Alert.alert('Pedidos', 'Abrindo aba Meus Pedidos...');
-                    }}
+                    onPress={() => navigateAndClose('/orders')}
                   >
                     <Text style={styles.hnvPpLinksText}>Pedidos</Text>
                   </Pressable>
@@ -467,10 +465,7 @@ export function BottomNavigation() {
                 styles.hnvButton,
                 pressed ? styles.hnvButtonActive : null,
               ]}
-              onPress={() => {
-                closeMenu();
-                Alert.alert('Carrinho', 'Abrindo seu carrinho de compras...');
-              }}
+              onPress={() => navigateAndClose('/cart')}
             >
               <Icon name="cart" size={26} color="#000000" />
               <Text style={styles.hnvButtonText}>
@@ -509,11 +504,11 @@ export function BottomNavigation() {
 
 const styles = StyleSheet.create({
   rootContainer: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     zIndex: 1000,
   },
   backdrop: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: 'transparent',
     zIndex: 998,
   },
